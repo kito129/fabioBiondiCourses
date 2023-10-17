@@ -1,4 +1,11 @@
-## Documentation
+# ES6 Notebook
+
+## Info
+
+[Video course by Fabio Biondi](https://fabiobiondi.teachable.com/courses/enrolled/448018)
+- bought on 10/01/2023
+- start on 10/01/2023
+- end on 10/16/2023
 
 ### 1.1 - Intro
 The introductory section covers basic TypeScript concepts and syntax.

@@ -1,10 +1,11 @@
-# Angular Fundamentals
+# Angular Fundamentals Notebook
 
 ## Info
 
 [Video course by Fabio Biondi](https://www.fabiobiondi.dev/video-courses/angular-fundamentals)
 - bought on 10/16/2023
 - start on 10/17/2023
+- start on 
 
 
 # To-Do List
@@ -709,7 +710,7 @@ export class Demo7Component {
 }
 ```
 
-## Lesson 2.17. from signal to observable
+### Lesson 2.17. from signal to observable
 
 ```typescript
 @Component({
