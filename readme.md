@@ -1,4 +1,5 @@
 # Fabio Biondi courses
 
-- ES6 and Typescript Fundamentals - [Notebook](./angularFundamentals/angularFundamentalsNotebook.md)
-- Angular Fundamentals - [Notebook](./es6TypeScript/es6Notebook.md)
+- [x] ES6 and Typescript Fundamentals - [Notebook](./es6TypeScript/es6Notebook.md)
+- [x] Angular 16 updates - [Notebook](./angularFundamentals/angular16newNotebook.md)
+- [ ] Angular Fundamentals - [Notebook](./angularFundamentals/angularFundamentalsNotebook.md)
