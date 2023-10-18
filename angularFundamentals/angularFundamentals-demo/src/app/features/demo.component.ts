@@ -20,24 +20,20 @@ import {HttpClient} from "@angular/common/http";
   styles: [
   ]
 })
-export class DemoComponent implements AfterViewInit {
+export class DemoComponent {
 	value = 0
-	serverData:Array<User>
+	serverData: Array<User>
 	server: ServerService = null
 	users: User[] | undefined;
+
 	constructor(http: HttpClient, utility: UtilityService) {
 		http.get<User[]>('https://jsonplaceholder.typicode.com/users')
 			.subscribe(result => {
 				this.users = result;
-				console.log(result)
+				// console.log(result)
 			});
 
 		this.value = utility.add(1, 2)
-	}
-
-	ngAfterViewInit(): void {
-		this.serverData = this.server.getUsers()
-		console.log(this.serverData);
 	}
 
 }

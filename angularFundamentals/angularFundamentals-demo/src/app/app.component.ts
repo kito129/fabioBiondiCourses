@@ -82,6 +82,15 @@ import {User} from "../model/user";
 
 	  <hr>
 
+	  <h2>Lesson 4.01. NgIf and LifeCycle</h2>
+
+	  <kito-correct-demo/>
+
+
+
+
+	  <hr>
+
 	  <h2>Router Outlet</h2>
 	  <router-outlet></router-outlet>
   `,

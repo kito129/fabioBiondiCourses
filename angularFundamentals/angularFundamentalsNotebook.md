@@ -756,5 +756,418 @@ export class AppComponent {
 
 ### Lesson 4.01.  ngIf and options ngIf...else
 
+> STRICT MODE: update snippet
+
+> In the latest releases of Angular (12 onwards) the strict mode option of the TypeScript compiler has been enabled by default.
+> This compiler configuration requires that all properties be initialized (so they cannot be undefined, like the examples in the videos).
+> For this reason, although I often do not initialize properties in my videos, the code snippets below the videos have instead been updated to meet this requirement.
+
+
 ```typeScript
+import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <div *ngIf="!users; else success">Loading...</div>
+
+    <ng-template #success>{{users | json}}</ng-template>
+  `,
+})
+export class AppComponent implements OnInit {
+
+  users: any[] = [] // must initialize in strict mode
+
+  constructor(private http: HttpClient) { 
+    setTimeout(() => {
+      http.get<any[]>('https://jsonplaceholder.typicode.com/users') // must use any
+        .subscribe(res => this.users = res);
+    }, 2000);
+  }
+
+}
 ```
+
+
+It is good practice to leave it to the constructor to only inject classes and initialize properties.
+
+The recommended approach to making a REST call is to make it in the ngOnInit method of the component lifecycle, which is automatically invoked by the framework right after the constructor.
+
+Below you will find this solution but in the next chapters we will discuss it in more detail.
+
+
+```typeScript
+import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <div *ngIf="!users; else success">Loading...</div>
+
+    <ng-template #success>{{users | json}}</ng-template>
+  `,
+})
+export class AppComponent implements OnInit {
+
+  users: any[] = []
+
+  constructor(private http: HttpClient) { }
+
+  ngOnInit() {
+    setTimeout(() => {
+      this.http.get<any[]>('https://jsonplaceholder.typicode.com/users')
+        .subscribe(res => this.users = res);
+    }, 2000);
+  }
+}
+```
+
+
+Below is an evolution of the exercise from the video in which:
+
+User is used to type the users property;
+The ng-template tag contains and displays a list of elements via an ngFor directive (described in later videos)
+
+[ngIf doc](https://angular.io/api/common/NgIf)
+
+
+
+```typeScript
+import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { User } from './model/user';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <div *ngIf="!users; else success">Loading...</div>
+
+    <ng-template #success>
+      <li *ngFor="let user of users">
+        {{user.name}}
+      </li>
+    </ng-template>
+  `,
+})
+export class AppComponent implements OnInit {
+
+  users: User[] = [];
+
+  constructor(private http: HttpClient) { }
+
+  ngOnInit() {
+		setTimeout(() => { // wrap the http call in a setTimeout to simulate a delay
+			this.http.get<Array<User>>('https://jsonplaceholder.typicode.com/users')
+				.subscribe((res: Array<User>) => this.users = res);
+		}, 2000);
+	}
+}
+```
+
+
+### Lesson 4.02. ngFor, collection types and index
+
+```typeScript 
+```
+
+
+### Lesson 4.03. ngFor: index, last and odd
+
+The following exported values can be aliased to local variables:
+
+- $implicit: T: The value of the individual items in the iterable (ngForOf).
+- ngForOf: NgIterable<T>: The value of the iterable expression. Useful when the expression is more complex then a property access, for example when using the async pipe (userStreams | async).
+- index: number: The index of the current item in the iterable.
+- count: number: The length of the iterable.
+- first: boolean: True when the item is the first item in the iterable.
+- last: boolean: True when the item is the last item in the iterable.
+- even: boolean: True when the item has an even index in the iterable.
+- odd: boolean: True when the item has an odd index in the iterable.
+
+```html 
+<h4>Correct Demo component - ngIf and NgFor</h4>
+
+<div *ngIf="!users; else success">Loading...</div>
+
+<ng-template #success> <!--ng-template-->
+	<li *ngFor="let user of users; let i = index; let odd; last as isLast">
+		<b>[{{user.id}}] - {{user.name}} - ({{user.company.name}})</b>
+
+		<hr *ngIf="odd">
+		<div *ngIf="isLast">END OF LIST</div>
+		</li>
+</ng-template>
+
+<hr>
+<!--ng-template and ngIf-->
+<div *ngIf="users; then thenBlock else elseBlock"></div>
+<ng-template #thenBlock>Content to render when condition is true.</ng-template>
+<ng-template #elseBlock>Content to render when condition is false.</ng-template>
+  
+```
+
+### Lesson 4.04. ngFor data manipulation
+
+```typeScript 
+import { Component } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { User } from './model/user';
+
+@Component({
+  selector: 'app-root',
+  template: `
+      <div *ngFor="let user of users">
+        {{user.name}}
+        <button (click)="delete(user)">delete</button>
+      </div>
+  `,
+})
+export class AppComponent {
+
+  users: User[] = []
+
+  constructor(private http: HttpClient) { 
+    http.get<User[]>('https://jsonplaceholder.typicode.com/users')
+      .subscribe((result: User[]) => this.users = result);
+  }
+  
+  delete(user: User) {
+    const index = this.users.indexOf(user);
+    this.users.splice(index, 1);
+  }
+}
+```
+### Lesson 4.05. ngSWitch
+
+```typeScript 
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <button (click)="goto('one')">one</button>
+    <button (click)="goto('two')">two</button>
+    <button (click)="goto('blabla')">three</button>
+
+    <div [ngSwitch]="section">
+      <div *ngSwitchCase="'one'">
+        Lorem Ipsum...
+      </div>
+      <div *ngSwitchCase="'two'">
+        <input type="text" placeholder="yeow">
+      </div>
+      <div *ngSwitchDefault>
+        wrong section
+      </div>
+    </div>
+  `
+})
+export class AppComponent  {
+  section = 'one';
+
+  goto(value: string) {
+    this.section = value;
+  }
+}
+```
+## Lesson 5. Styling
+
+
+### Lesson 5.01. Styles and Components
+
+```typeScript
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <h1 class="male">hello world</h1>
+  `,
+  styles: [`
+    .male { color: blue }
+    .female { color: pink }
+  `]
+})
+export class AppComponent {
+
+}
+```
+
+### Lesson 5.02. Inline CSS class
+
+```typeScript
+// app.component.ts
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <li
+      *ngFor="let user of users"
+      [class.male]="user.gender === 'M'"
+      [class.female]="user.gender === 'F'"
+    >{{user.name}}</li>
+  `,
+  styles: [`
+    .male { background-color: blue; color: white }
+    .female { background-color: pink }
+  `]
+})
+export class AppComponent {
+  users = [
+    { id: 1, name: 'Fabio', gender: 'M' },
+    { id: 2, name: 'Lisa', gender: 'F' },
+    { id: 3, name: 'Lorenzo', gender: 'M' },
+    { id: 4, name: 'Silvia', gender: 'F' }
+  ];
+}
+```
+
+
+### Lesson 5.03. ngClass
+
+```typeScript
+// Versione 2
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <li
+      *ngFor="let user of users"
+      [ngClass]="getCls(user)"
+    >{{user.name}}</li>
+  `,
+  styles: [`
+    .male { background-color: blue; color: white }
+    .female { background-color: pink }
+  `]
+})
+export class AppComponent {
+  users = [
+    { id: 1, name: 'Fabio', gender: 'M' },
+    { id: 2, name: 'Lisa', gender: 'F' },
+    { id: 3, name: 'Lorenzo', gender: 'M' },
+    { id: 4, name: 'Silvia', gender: 'F' }
+  ];
+  
+  getCls(user) {
+    return {
+      'big': user.gender === 'M',
+      'male': user.gender === 'M'
+    }
+  }
+}
+```
+
+
+### Lesson 5.04. Inline Styling
+
+
+```typeScript
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <li
+      *ngFor="let user of users"
+      [style.color]="user.gender === 'M' ? 'white' : null"
+      [style.backgroundColor]="user.gender === 'M' ? 'blue' : 'pink'"
+      [style.fontSize.px]="user.age"
+    >{{user.name}}</li>
+  `
+})
+export class AppComponent {
+  users = [
+    { id: 1, name: 'Fabio', gender: 'M', age: 30 },
+    { id: 2, name: 'Lisa', gender: 'F', age: 20 },
+    { id: 3, name: 'Lorenzo', gender: 'M', age: 10 },
+    { id: 4, name: 'Silvia', gender: 'F', age: 130 }
+  ];
+}
+```
+
+
+### Lesson 5.05. ngStyle
+
+```typeScript
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <li
+      *ngFor="let user of users"
+      [ngStyle]="getStyle(user)"
+    >{{user.name}}</li>
+  `
+})
+export class AppComponent {
+  users = [
+    { id: 1, name: 'Fabio', age: 30, gender: 'M' },
+    { id: 2, name: 'Lisa', age: 20, gender: 'F' },
+    { id: 3, name: 'Lorenzo', age :10, gender: 'M' },
+    { id: 4, name: 'Silvia', age: 130, gender: 'F' }
+  ];
+
+  getStyle(user) {
+    return {
+      backgroundColor: user.gender === 'M' ? 'black' : 'grey',
+      color:user.gender === 'M' ? 'blue' : 'pink',
+      fontSize: `${user.age}px`
+    };
+  }
+}
+```
+
+
+### Lesson 5.06. CSS 3rd party and angular.json
+
+
+```json
+npm install bootstrap font-awesome
+```
+
+
+```typeScript
+// app.component.ts
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <div class="container">
+      <button class="btn btn-primary">
+        <i class="fa fa-bluetooth"></i>
+        CLOSE
+      </button>
+      
+      <div class="card">
+        <div class="card-header">TITOLO</div>
+        <div class="card-body">BODY</div>
+      </div>
+    </div>
+  `
+})
+export class AppComponent {
+
+}
+```
+
+```json
+// angular.json
+
+"styles": [
+  "./node_modules/bootstrap/dist/css/bootstrap.min.css",
+  "./node_modules/font-awesome/css/font-awesome.min.css",
+  "src/styles.css"
+],
+```
+
+## Lesson 6. 
+
+
+### Lesson 6.01. 
