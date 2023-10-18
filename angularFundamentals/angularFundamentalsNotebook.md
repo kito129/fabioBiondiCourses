@@ -611,6 +611,7 @@ export class AppComponent {
 ```
 
 
+### Lesson 3.05.  Components
 
 
 
@@ -619,28 +620,141 @@ export class AppComponent {
 
 
 
-### Lesson 3.01. Interpolation 
-
-```typeScript
-```
 
 ### Lesson 3.01. Interpolation 
 
 ```typeScript
+// app.component.ts
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <kito-demo></kito-demo>
+    <kito-demo></kito-demo>
+  `
+})
+export class AppComponent { }
 ```
-### Lesson 3.01. Interpolation 
 
 ```typeScript
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'kito-demo',
+  template: `
+    <h4>Demo componente</h4>
+  `,
+  styles: [
+  ]
+})
+export class DemoComponent {
+
+}
+
 ```
-### Lesson 3.01. Interpolation 
+```typeScript
+@NgModule({
+  declarations: [
+    AppComponent,
+    DemoComponent
+  ],
+  imports: [
+    BrowserModule,
+    AppRoutingModule
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+
+```
+
+
+
+
+### Lesson 3.06. Custom Types
+ 
+```typeScript
+export interface User {
+	id: number;
+	name: string;
+	address?: Address
+}
+
+export interface Address {
+	street: string;
+	city: string;
+	province?: string;
+	zip: string;
+}
+
+```
+### Lesson 3.07. Introduction to service and DI
 
 ```typeScript
+// app.component.ts
+import { Component } from '@angular/core';
+import { Utility } from './services/utility';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <h1>Hello World</h1>
+  `
+})
+export class AppComponent {
+  constructor(utils: Utility) {
+    const response = utils.add(1, 4)
+    console.log(response);
+  }
+}
+
 ```
-### Lesson 3.01. Interpolation 
 
 ```typeScript
+// services/utility.ts
+export class Utility {
+  add(a: number, b: number): number {
+    return a + b;
+  }
+}
 ```
-### Lesson 3.01. Interpolation 
+
+
+### Lesson 3.08.  Server Comunication
+
+```typeScript
+TYPESCRIPT
+// app.component.ts
+import { Component } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { User } from './model/user';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <li *ngFor="let user of users">
+      {{user.name}}
+    </li>
+  `
+})
+export class AppComponent {
+  users: User[] | undefined;
+
+  constructor(http: HttpClient) {
+    http.get<User[]>('https://jsonplaceholder.typicode.com/users')
+      .subscribe(result => {
+        this.users = result;
+      });
+  }
+}
+
+```
+## Lesson 4. Angular Structural Directives
+
+
+### Lesson 4.01.  ngIf and options ngIf...else
 
 ```typeScript
 ```
