@@ -7,4 +7,4 @@
     - [Repo](./angularFundamentals/angular16-demo/)
 - [ ] Angular Fundamentals 
     - [Notebook](./angularFundamentals/angularFundamentalsNotebook.md)
-    - [Repo](./angularFundamentals/angularFundamentals/)
+    - [Repo](./angularFundamentals/angularFundamentals-demo/)
