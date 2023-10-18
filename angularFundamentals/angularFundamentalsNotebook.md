@@ -438,8 +438,209 @@ export class AppComponent {
 }
 
 ```
+### Lesson 2.06. ng new : parameters
+```text
+  ng new angularFundamentals-demo --inline-template --inline-style --skip-tests --prefix kito
+```
+
+Some options:
+```text
+--inline-template
+--inline-style 
+--skip-tests 
+--prefix kito // remove possible conflict with third-apps components
+```
+
+## Lesson 3. Fundamentals
+
+### Lesson 3.01. Interpolation {{value}}
+
+Use of interpolation {{template tags}} inside HTMl
+
+```typeScript
+import { Component } from '@angular/core';
+ 
+@Component({
+   selector: 'fb-root',
+   template: `
+       <h1>{{1+1+1}}</h1>
+       <h1>{{label}} dato con variabile</h1>
+       <h1>{{gender==='M' ? 'Uomo': 'Donna' }}  operatore ternario</h1>
+       `,
+   styles: []
+})
+export class AppComponent {
+   label = 'mario rossi'
+   gender = 'F'
+}
+```
+
+```typeScript
+// app.component.ts
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-template-tags',
+  template: `
+    <h1>{{1+1+1}}</h1>
+    <h2>{{yourname}}</h2>
+  `
+})
+export class TemplateTagsComponent  {
+  yourname = 'Fabio Biondi';
+}
+```
+
+
+### Lesson 3.02. Native events: mouse e keyboard
+
+> UPDATE:
+
+> in the last release of Angular the event emitted by (keyboard.enter) is of type Event instead of KeyboardEvent inserted in the video.
+
+```typeScript
+// app.component.ts
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <button (click)="clickHandler($event)">Click me</button>
+    <hr>
+    <input type="text" (keydown)="inputHandler($event)">
+    <hr>
+    <input type="text" (keydown.enter)="inputHandler($event)">
+  `
+})
+export class AppComponent {
+
+  clickHandler(event: MouseEvent) {
+    console.log(event);
+  }
+
+  inputHandler(event: Event) {
+    // const target: HTMLInputElement = event.target as HTMLInputElement;
+    const target: HTMLInputElement = <HTMLInputElement>event.target;
+    console.log(target.value);
+  }
+}
+
+```
+
+### Lesson 3.03. Directives
+
+```typeScript
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'app-directives',
+  template: `
+    <button (click)="visible = !visible">toggle</button>
+    <hr>
+    <img
+      *ngIf="visible"
+      src="https://angular.io/assets/images/logos/angular/angular.png">
+
+    <li 
+      [hidden]="!visible" 
+      *ngFor="let user of users"
+    >{{user}}</li>
+  `
+})
+export class DirectivesComponent {
+  visible = true;
+  users = ['Fabio', 'Simone', 'Lorenzo'];
+}
+```
+
+
+```typeScript
+import { Component } from '@angular/core';
+ 
+@Component({
+   selector: 'fb-root',
+   template: `
+      <button (click)="visible=!visible">invert</button>
+      <button (click)="toggle()">toggle</button>
+      <h1 *ngIf="visible"> Hello World</h1>
+      <li
+        [hidden]="!visible"
+        *ngFor="let user of users"
+      >{{user}}</li>
+       `,
+})
+ 
+ 
+export class AppComponent {
+   visible = true
+   users = ['fabio', 'lorenzo', 'Simone']
+   toggle() {
+       this.visible = !this.visible
+   }
+}
+```
+
+
+### Lesson 3.04.  Attributes and brackets (brackets)
+
+```typeScript
+// app.component.ts
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <div>
+      <button [disabled]="imageUrl" (click)="loadUrl()">load</button>
+      <button [disabled]="!imageUrl" (click)="unloadUrl()">unload</button>
+    </div>
+    <img  *ngIf="imageUrl" [src]="imageUrl">
+  `
+})
+export class AppComponent {
+
+  // attribute and brackets
+  imageUrl: string;
+  loadUrl() {
+    this.imageUrl = 'https://angular.io/assets/images/logos/angular/angular.png';
+  }
+  unloadUrl() {
+    this.imageUrl = null;
+  }
+}
+```
 
 
 
 
 
+
+
+
+
+
+### Lesson 3.01. Interpolation 
+
+```typeScript
+```
+
+### Lesson 3.01. Interpolation 
+
+```typeScript
+```
+### Lesson 3.01. Interpolation 
+
+```typeScript
+```
+### Lesson 3.01. Interpolation 
+
+```typeScript
+```
+### Lesson 3.01. Interpolation 
+
+```typeScript
+```
+### Lesson 3.01. Interpolation 
+
+```typeScript
+```

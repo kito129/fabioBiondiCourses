@@ -1,6 +1,8 @@
 {
-  "name": "angular-fundamentals",
-  "version": "0.0.0",
+  "name": "angular-fundamentals-demo",
+  "version": "0.0.1",
+  "author": "kito129",
+  "description": "Based on Angular Fundamentals course by Fabio Biondi, developed in 2023 by kito129",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
