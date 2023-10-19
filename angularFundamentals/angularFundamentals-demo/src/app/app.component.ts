@@ -86,10 +86,19 @@ import {User} from "../model/user";
 
 	  <kito-correct-demo/>
 
+	  <hr>
 
+	  <h2>Lesson 5. Styling</h2>
 
+	  <kito-styling/>
 
 	  <hr>
+
+		<h2>Lesson 6. Template-driven Form </h2>
+
+		<kito-template-driven-form/>
+
+		<hr>
 
 	  <h2>Router Outlet</h2>
 	  <router-outlet></router-outlet>

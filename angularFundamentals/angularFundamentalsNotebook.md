@@ -14,8 +14,8 @@
 
 - [x] Planning
 - [x] day1
-- [ ] day2
-- [ ] day3
+- [x] day2
+- [x] day3
 - [ ] day4
 - [ ] day5
 - [ ] day6
@@ -974,11 +974,31 @@ export class AppComponent  {
 ```
 ## Lesson 5. Styling
 
+Styling Approach is component based, CSS is isolated for each component, and not global.
+
+```typeScript
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <h1 class="male">hello world</h1>
+  `,
+  stylesUrl: ['./app.component.css'] // to use external css file for this component only
+})
+export class AppComponent {
+
+}
+```
+
+To apply globals style use the file src/styles.css
+
+Can also use backticks for inline style
+
 
 ### Lesson 5.01. Styles and Components
 
 ```typeScript
-import { Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-root',
@@ -999,7 +1019,6 @@ export class AppComponent {
 
 ```typeScript
 // app.component.ts
-import { Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-root',
@@ -1028,43 +1047,71 @@ export class AppComponent {
 
 ### Lesson 5.03. ngClass
 
+[ngClass doc](https://angular.io/api/common/NgClass)
+
+The CSS classes are updated as follows, depending on the type of the expression evaluation:
+
+- **string** - the CSS classes listed in the string (space delimited) are added,
+- **Array** - the CSS classes declared as Array elements are added,
+- **Object** - keys are CSS classes that get added when the expression given in the value evaluates to a truthy value, otherwise they are removed.
+
+```html
+  <some-element [ngClass]="'first second'">...</some-element>
+
+  <some-element [ngClass]="['first', 'second']">...</some-element>
+
+  <some-element [ngClass]="{'first': true, 'second': true, 'third': false}">...</some-element>
+
+  <some-element [ngClass]="stringExp|arrayExp|objExp">...</some-element>
+
+  <some-element [ngClass]="{'class1 class2 class3' : true}">...</some-element>
+```
+
+
 ```typeScript
 // Versione 2
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-root',
-  template: `
-    <li
-      *ngFor="let user of users"
-      [ngClass]="getCls(user)"
-    >{{user.name}}</li>
-  `,
-  styles: [`
-    .male { background-color: blue; color: white }
-    .female { background-color: pink }
-  `]
+	selector: 'kito-styling',
+	template: `
+	  <h4>Styling Component</h4>
+
+	  <h1 class="male">Male class</h1>
+	  <h1 class="female">Female class</h1>
+
+	  <li *ngFor="let user of users"
+		  [ngClass]="getCls(user)"
+	  >{{user.name}}</li>
+	`,
+	styles: [`
+		.male { background-color: blue; color: white }
+		.female { background-color: pink }
+	`]
 })
-export class AppComponent {
-  users = [
-    { id: 1, name: 'Fabio', gender: 'M' },
-    { id: 2, name: 'Lisa', gender: 'F' },
-    { id: 3, name: 'Lorenzo', gender: 'M' },
-    { id: 4, name: 'Silvia', gender: 'F' }
-  ];
-  
-  getCls(user) {
-    return {
-      'big': user.gender === 'M',
-      'male': user.gender === 'M'
-    }
-  }
+export class StylingComponent {
+
+	users = [
+		{ id: 1, name: 'Fabio', gender: 'M' },
+		{ id: 2, name: 'Lisa', gender: 'F' },
+		{ id: 3, name: 'Lorenzo', gender: 'M' },
+		{ id: 4, name: 'Silvia', gender: 'F' }
+	];
+
+	getCls(user) { // move the logic in the component, NOT use ternary operator in the template
+		return {
+			'big': user.gender === 'M',
+			'male': user.gender === 'M'
+		}
+	}
+
 }
 ```
 
-
 ### Lesson 5.04. Inline Styling
 
+- [Component styling best practices](https://angular.io/guide/component-styles#component-styling-best-practices)
+- [Template inline styles](https://angular.io/guide/component-styles#template-inline-styles)
 
 ```typeScript
 import { Component } from '@angular/core';
@@ -1167,7 +1214,419 @@ export class AppComponent {
 ],
 ```
 
-## Lesson 6. 
+## Lesson 6. Template-driven Form
+
+[Forms Doc](https://angular.io/guide/forms-overview)
+
+> Angular provides two different approaches to handling user input through forms: reactive and template-driven. Both capture user input events from the view, validate the user input, create a form model and data model to update, and provide a way to track changes.
 
 
-### Lesson 6.01. 
+#### Choosing an approach
+Reactive forms and template-driven forms process and manage form data differently. Each approach offers different advantages.
+
+A - Reactive forms	Provide direct, explicit access to the underlying form's object model. Compared to template-driven forms, they are more robust: **they're more scalable, reusable, and testable**. If forms are a key part of your application, or you're already using reactive patterns for building your application, use reactive forms.
+
+B - Template-driven forms	Rely on directives in the template to create and manipulate the underlying object model. They are useful for adding a simple form to an app, such as an email list signup form. They're straightforward to add to an app, **but they don't scale as well as reactive forms**. If you have very basic form requirements and logic that can be managed solely in the template, template-driven forms could be a good fit.
+
+#### Template-driven Form
+[Template-driven Form Doc](https://angular.io/guide/forms-overview#setup-in-template-driven-forms)
+
+
+![Template-driven Form](https://angular.io/generated/images/guide/forms-overview/key-diff-td-forms.png)
+
+![Data Flow VIEW -> MODEL](https://angular.io/generated/images/guide/forms-overview/dataflow-td-forms-vtm.png)
+
+![Data Flow MODEL -> VIEW](https://angular.io/generated/images/guide/forms-overview/dataflow-td-forms-mtv.png)
+
+
+### Lesson 6.01. Input, "template reference variables", keyboard events
+
+```typeScript
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'kito-template-driven-form',
+  template: `
+		<h2>Template Driven Form</h2>
+
+		<h3>Input, "template reference variables", keyboard events </h3>
+
+		<!-- #inputName is a template reference variables-->
+		<input
+			type="text"
+			#inputName
+			placeholder="Add new name"
+			(keyup.enter)="addUser(inputName)"
+		>
+		<button (click)="addUser(inputName)">➕</button>
+
+		<li *ngFor="let user of users">
+			{{user}}
+			<button (click)="deleteUser(user)">❌</button>
+		</li>
+
+		<hr>
+
+		<h3>Input, "template reference variables", keyboard events </h3>
+  `,
+  styles: [
+  ]
+})
+export class TemplateDrivenFormComponent {
+	users: string[] = ['Fabio', 'John', 'Doe'];
+
+	addUser(input: HTMLInputElement) {
+		this.users.push(input.value); // using template reference variables inputName
+		input.value = '';
+		input.focus();
+	}
+
+	deleteUser(user: string) {
+		this.users = this.users.filter(u => u !== user);
+	}
+
+}
+
+```
+
+### Lesson 6.02. ngModel: 1way vs 2 way binding
+
+[ngModel Doc](https://angular.io/api/forms/NgModel)
+
+
+```typeScript
+// NOTA: ricordati di importare FormsModule in AppModule
+
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <input
+      type="text"
+      placeholder="Add User name"
+      [(ngModel)]="label"
+    >
+    
+    <button (click)="add()">ADD</button>
+    <li *ngFor="let user of users">{{user}}</li>
+  `
+})
+export class AppComponent {
+  label: string = 'guest';
+  users: string[] = [];
+
+  add() {
+    console.log(this.label);
+    // Add to list
+    this.users.push(this.label);
+    this.label = null;
+  }
+}
+```
+
+### Lesson 6.03. ngForm, ngModel and data model
+
+```typeScript
+// model/user.ts
+interface User {
+  label: string;
+  age: string;
+}
+```
+
+Part 1
+
+```typeScript
+import { Component, OnInit } from '@angular/core';
+import { User } from './model/user';
+import { NgForm } from '@angular/forms';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <form #f="ngForm" (submit)="add(f)">
+      <input 
+        type="text"
+        placeholder="Add User name"
+        [ngModel]="label"
+        name="label"
+      >
+      <input 
+        type="number"
+        placeholder="Add User age"
+        [ngModel]="age"
+        name="age"
+      >
+      <button type="submit">ADD</button>
+    </form>
+
+    <li *ngFor="let user of users">
+      {{user.label}} ({{user.age}})
+    </li>
+
+  `,
+  styles: []
+})
+export class AppComponent {
+  users: User[] = [];
+
+  add(form: NgForm) {
+    this.users.push(form.value as User);
+  }
+
+}
+```
+
+Part 2
+```typeScript
+import { Component, OnInit } from '@angular/core';
+import { NgForm } from '@angular/forms';
+ 
+ 
+interface User {
+   label: string;
+   age: string;
+   color: string;
+ }
+
+
+@Component({
+ selector: 'fb-root',
+ template: `
+   <form #f="ngForm" (submit)="add(f)">
+     <input
+       type="text"
+       placeholder="Add User name"
+       [ngModel]="user?.label"
+       name="label"
+     >
+     <input
+       type="number"
+       placeholder="Add User age"
+       [ngModel]="user?.age"
+       name="age"
+     >
+     <input
+       type="srting"
+       placeholder="Add Color"
+       [ngModel]="user?.color"
+       name="color"
+     >
+     <button type="submit">{{user ? 'EDIT': 'ADD'}}</button>
+   </form>
+ 
+   <li *ngFor="let user of users" (click)="setActive(user)" [style.background] ="user.color">
+     {{user.label}} ({{user.age}})
+   </li>
+ `
+})
+export class AppComponent {
+ users: User[] = [];
+ user: User | undefined;  // fix for strict mode
+ 
+ add(form: NgForm) {
+   this.users.push(form.value as User);
+ }
+ 
+ setActive(user: User){
+     this.user = user
+ }
+ 
+}
+ 
+```
+
+### Lesson 6.04. Form Validation
+
+```typeScript
+import { Component } from '@angular/core';
+import { NgForm } from '@angular/forms';
+
+ 
+interface User {
+   label: string;
+   age: number;
+ }
+
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <form #f="ngForm" (submit)="add(f)">
+      <input 
+        type="text" 
+        placeholder="Add User name"
+        [ngModel]="user?.label"
+        name="label"
+        #labelRef="ngModel"
+        required
+        minlength="3"
+        [ngClass]="{'error': labelRef.invalid && f.dirty}"
+      >
+
+      <input
+          type="number"
+          placeholder="Add User age"
+          [ngModel]="user?.age"
+          name="age"
+          #ageRef="ngModel"
+          [ngClass]="{'error': ageRef.invalid && f.dirty}"
+          required
+      >
+
+      <button type="submit" [disabled]="f.invalid">
+        ADD
+      </button>
+    </form>
+    
+    <li *ngFor="let user of users">
+      {{user.label}}
+    </li>
+  `,
+  styles: [`
+    .error { 
+        background-color: red;
+    }
+  `]
+})
+export class AppComponent {
+  user: User | undefined;  // fix for strict mode
+  users: User[] = [];
+
+  add(form: NgForm) {
+    this.users.push(form.value);
+  }
+}
+```
+
+### Lesson 6.05. Form, validation e error handling
+
+
+```typeScript
+import { Component } from '@angular/core';
+import { NgForm } from '@angular/forms';
+
+ 
+interface User {
+   label: string;
+   age: number;
+   city: string;
+   color?: string;
+}
+
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <div *ngIf=""labelRef.errors?.required>il campo è obbligatorio</div>
+    <div *ngIf="labelRef.errors?.minlength">
+      troppo corto. Mancano 
+      {{ labelRef.errors?.minlength.requiredLength - labelRef.errors?.minlength.actualLength }} 
+      caratteri
+    </div>
+  
+    <form #f="ngForm" (submit)="add(f)">
+      <input 
+        type="text" 
+        placeholder="Add User name"
+        [ngModel]="user?.label"
+        name="label"
+        #labelRef="ngModel"
+        required
+        minlength="5"
+        [ngClass]="{'error': labelRef.invalid && f.dirty}"
+      >
+
+      <input
+          type="number"
+          placeholder="Add User age"
+          [ngModel]="user?.age"
+          name="age"
+          #ageRef="ngModel"
+          [ngClass]="{'error': ageRef.invalid && f.dirty}"
+          required
+      >
+
+      <button type="submit" [disabled]="f.invalid">
+        ADD
+      </button>
+    </form>
+    
+    <li *ngFor="let user of users">
+      {{user.label}}
+    </li>
+  `,
+  styles: [`
+    .error { 
+        background-color: red;
+    }
+  `]
+})
+export class AppComponent {
+  user: User | undefined; // fix for strict mode
+  users: User[] = [];
+
+  add(form: NgForm) {
+    this.users.push(form.value);
+    form.reset();
+  }
+}
+
+
+interface User {
+  label: string;
+  age: number;
+  city: string;
+  color?: string;
+}
+```
+
+
+
+## Lesson 7. Custom Components
+
+
+### Lesson 7.01. 
+
+```typeScript
+```
+
+```typeScript
+```
+
+```typeScript
+```
+
+### Lesson 7.02. 
+
+```typeScript
+```
+
+```typeScript
+```
+
+```typeScript
+```
+
+### Lesson 7.03. 
+
+```typeScript
+```
+
+```typeScript
+```
+
+```typeScript
+```
+
+### Lesson 7.04. 
+
+```typeScript
+```
+
+```typeScript
+```
+
+```typeScript
+```
