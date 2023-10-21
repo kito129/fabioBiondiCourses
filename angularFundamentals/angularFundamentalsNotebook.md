@@ -1587,46 +1587,2099 @@ interface User {
 ## Lesson 7. Custom Components
 
 
-### Lesson 7.01. 
+### Lesson 7.01. Hello Components
+
 
 ```typeScript
+// app.component.ts
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <app-hello></app-hello>
+    <app-hello></app-hello>
+    <app-hello></app-hello>
+  `
+})
+export class AppComponent {
+
+}
+```
+
+```typeScript
+// components/hello.component.ts
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-hello',
+  template: `
+    <h3>
+      Hello Ciccio
+    </h3>
+  `
+})
+export class HelloComponent {
+
+}
+```
+
+```typeScript
+// app.module.ts
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+
+import { AppComponent } from './app.component';
+import { HelloComponent } from './components/hello.component';  // <===
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    HelloComponent      // <===
+  ],
+  imports: [
+    BrowserModule,
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+```
+
+### Lesson 7.02. Input Properties
+
+```typeScript
+// app.component.ts
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <app-hello name="Ciccio" color="red"></app-hello>
+    <app-hello name="Mario"></app-hello>
+    <app-hello name="Fabio"></app-hello>
+  `
+})
+export class AppComponent {
+
+}
+```
+
+```typeScript
+// components/hello.component.ts
+import { Component, Input } from '@angular/core';
+
+@Component({
+  selector: 'app-hello',
+  template: `
+    <h3 [style.color]="color">
+      Hello {{name}}
+    </h3>
+  `
+})
+export class HelloComponent {
+  @Input() name: string | undefined; // fix for strict mode
+  @Input() color: string = 'blue';
+}
+```
+
+### Lesson 7.03. Content Projection
+
+```typeScript
+// app.component.ts
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <div class="container mt-3">
+      <app-card title="Profile">
+        Lorem Ipsum...
+      </app-card>   
+      
+      <app-card title="Form">
+        <input type="text">
+        <input type="text">
+        <input type="text">
+      </app-card>
+      
+      <app-card>
+        <div class="row">
+          <div class="col">
+            <app-card title="1">
+              <input type="text">
+            </app-card>
+          </div>
+          <div class="col">
+            <app-card title="2">
+              bla bla
+            </app-card>
+          </div>
+        </div>
+      </app-card>
+    </div>
+  `
+})
+export class AppComponent {
+
+}
+```
+
+```typeScript
+// components/card.component.ts
+import { Component, Input } from '@angular/core';
+
+@Component({
+  selector: 'app-card',
+  template: `
+    <div class="card mb-3">
+      <div class="card-header">{{title}}</div>
+      <div class="card-body">
+        <ng-content></ng-content>
+      </div>
+    </div>
+  `
+})
+export class CardComponent {
+  @Input() title: string | undefined; // fix for strict mode
+}
 ```
 
 ```typeScript
 ```
 
-```typeScript
-```
-
-### Lesson 7.02. 
+### Lesson 7.04. "stateful" Components e Input default value
 
 ```typeScript
+// card.component.ts
+import { Component, Input, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'app-card',
+  template: `
+    <div class="card mb-3">
+      <div class="card-header" (click)="opened = !opened">{{title}}</div>
+      <div class="card-body" *ngIf="opened">
+        <ng-content></ng-content>
+      </div>
+    </div>
+  `
+})
+export class CardComponent {
+  @Input() title = 'N/D';
+  opened = false;
+}
+```
+
+### Lesson 7.06. Output event emitter: realizzare un TabBar component riutilizzabile
+
+I mentioned the Redux pattern several times in this video. What is it?
+
+It is a pattern that allows us to manage the application state of an application by separating it clearly from the GUI. Originally created to manage the state of React applications, it has now caught on in the Angular ecosystem as well, first with a porting, Angular Redux, and then with a new library called NGRX.
+
+This topic will not be covered in this course but, if you are curious, I'll leave you with some in-depth links. This topic, however, is not the easiest so I recommend that you read up on it only after you get a little familiar with Angular:
+
+My slides on the topic
+- The official Redux site (although focused on React)
+- Angular Redux
+- NGRX Platform
+
+```typeScript
+// app/app.component.ts
+import { Component } from '@angular/core';
+import { TabbarItem } from './shared/tabbar';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <app-tabbar
+        [items]="users"
+        [active]="activeUser"
+        (tabClick)="openDetails($event)"
+    ></app-tabbar>
+
+    <div class="card" *ngIf="activeUser">
+      <div class="card-header">{{activeUser.name}}</div>
+      <div class="card-body">
+        {{activeUser.desc}}
+        <img src="https://maps.googleapis.com/maps/api/staticmap?center={{activeUser.country}}&zoom=5&size=200x200&key=AIzaSyBAyMH-A99yD5fHQPz7uzqk8glNJYGEqus" >
+      </div>
+    </div>
+  `
+})
+export class AppComponent {
+  users: TabbarItem[] = [
+    { id: 1, country: 'Italy', name: 'Mario', desc: 'bla bla'},
+    { id: 2, country: 'Japan', name: 'Fabio'},
+    { id: 3, country: 'Spain', name: 'Ciro'},
+  ];
+
+  activeUser: TabbarItem| null = null
+
+  openDetails(user: TabbarItem) {
+    this.activeUser = user;
+  }
+}
+
 ```
 
 ```typeScript
+// app/shared/tabbar.component.ts
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { TabbarItem } from './tabbar';
+
+@Component({
+  selector: 'app-tabbar',
+  template: `
+    <ul class="nav nav-tabs">
+      <li class="nav-item" 
+          *ngFor="let item of items"
+          (click)="tabHandler(item)"
+      >
+        <a class="nav-link"
+           [ngClass]="{'active': item.id === active?.id }"
+        >{{item.name}}</a>
+      </li>
+     
+    </ul>
+  `,
+  styles: []
+})
+export class TabbarComponent {
+  @Input() items: TabbarItem[] | null = null
+  @Input() active: TabbarItem | null = null
+  @Output() tabClick: EventEmitter<TabbarItem> = new EventEmitter();
+
+  tabHandler(item: TabbarItem) {
+    this.tabClick.emit(item);
+  }
+}
 ```
 
 ```typeScript
+// app/shared/components/tabbar.ts
+export interface TabbarItem {
+  id: number;
+  name: string;
+  country?: string;
+  desc?: string;
+}
 ```
 
-### Lesson 7.03. 
+### Lesson 7.07. Lifecycle hook: ngOnInit
 
 ```typeScript
+// app.component.ts
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <app-meteo city="London"></app-meteo>
+  `
+})
+export class AppComponent {
+}
+
 ```
 
 ```typeScript
+// components/meteo.component.ts
+import { Component, Input, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { APP_TOKEN } from './config';
+
+@Component({
+  selector: 'app-meteo',
+  template: `
+    <h1>{{city}}</h1>
+    <div *ngIf="weather">
+      <h3>{{weather?.main.temp}}°</h3>
+      <h3>{{weather?.main.humidity}}%</h3>
+    </div>
+    <pre>{{weather | json}}</pre>
+    `,
+  styles: []
+})
+export class MeteoComponent implements OnInit {
+  @Input() city: string | null = null
+  weather: any; // <== Naturalmente potresti creare un custom type per questo oggetto. A te il compito di farlo :P
+
+  constructor(private http: HttpClient) {
+    console.log(this.city)
+  }
+
+  ngOnInit() {
+    console.log(this.city)
+    this.http.get(`http://api.openweathermap.org/data/2.5/weather?q=MILANO&units=metric&APPID=${APP_TOKEN}`)
+      .subscribe(res => {
+        this.weather = res;
+      });
+  }
+
+}
 ```
 
 ```typeScript
+export const APP_TOKEN = '[YOUR TOKEN HERE]';
 ```
 
-### Lesson 7.04. 
+### Lesson 7.08. Lifecycle Hook: onChange
 
-```typeScript
-```
-
-```typeScript
-```
+To carry out this exercise and use the Weather API you need to create a free token from the [Open Weather Map site](https://openweathermap.org/).
 
 ```typeScript
+// app.component.ts
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <app-meteo [city]="city"></app-meteo>
+    <button (click)="changeCity()">Change City</button>
+  `,
+})
+export class AppComponent {
+  city = 'Milano';
+  changeCity() {
+    this.city = 'NEW YORK';
+  }
+}
 ```
+
+```typeScript
+// components/meteo.component.ts
+import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { APP_TOKEN } from './config';
+
+@Component({
+  selector: 'app-meteo',
+  template: `
+    <h1>{{city}}</h1>
+    <div *ngIf="weather">
+      <h3>{{weather?.main.temp}}°</h3>
+      <h3>{{weather?.main.humidity}}%</h3>
+    </div>
+    `,
+  styles: []
+})
+export class MeteoComponent implements OnChanges {
+  @Input() city: string | null = null
+  weather: any;
+
+  constructor(private http: HttpClient) {}
+
+  ngOnChanges(changes: SimpleChanges) {
+    const city = changes['city']
+
+    if (city) {
+      this.http.get(`http://api.openweathermap.org/data/2.5/weather?q=${city.currentValue}&units=metric&APPID=${APP_TOKEN}`)
+        .subscribe(res => {
+          this.weather = res;
+        });
+    }
+  }
+}
+```
+
+```typeScript
+// components/config.js
+export const APP_TOKEN = 'YOUR TOKEN HERE';
+```
+
+### Lesson 7.09. ChangeDetectionStrategy, ChangeDetectorRef and Immutable State
+
+TIP - CHANGE DETECTION: WHEN ARE TEMPLATES RECOMPILED?
+
+There are three situations that generate "unchecked" rendering of components:
+
+- User Iterations with mouse and keyboard
+- XHR: HTTP calls
+- Timers: setInterval and setTimeout
+
+Using the onPush strategy of the ChangeDetectionStrategy and the ChangeDetectorRef service, we can instead control the rendering of each individual component
+
+```typeScript
+// app.component.ts
+import { Component } from '@angular/core';
+import { NgForm } from '@angular/forms';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <app-meteo [city]="city"></app-meteo>
+
+    <form #f="ngForm" (submit)="changeCity(f)">
+      <input type="text" [ngModel]="city.value" name="city">
+      <button type="submit">Update</button>
+    </form>
+  `,
+})
+export class AppComponent {
+  city = { value: 'Milano' };
+
+  changeCity(form: NgForm) {
+    
+    // Mutate Object: cannot work with onPush Strategy
+    // this.city.value = form.value.city;
+    
+    // Use Immutable Approach instead
+    this.city = { value : form.value.city };
+  }
+}
+
+```
+
+```typeScript
+// components/meteo.component.ts
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { APP_TOKEN } from './config';
+
+@Component({
+  selector: 'app-meteo',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <h1>{{city.value}}</h1>
+    <div *ngIf="weather">
+      <h3>{{weather?.main.temp}}°</h3>
+      <h3>{{weather?.main.humidity}}%</h3>
+      
+      <div>{{printMe()}}</div>
+    </div>
+    `,
+  styles: []
+})
+export class MeteoComponent implements OnChanges {
+  @Input() city: any;
+  weather: any;
+
+  constructor(private http: HttpClient, private cd: ChangeDetectorRef) {}
+
+  ngOnChanges(changes: SimpleChanges) {
+    const city = changes.city;
+    if (city) {
+      this.http.get(`http://api.openweathermap.org/data/2.5/weather?q=${city.currentValue}&units=metric&APPID=${APP_TOKEN}`)
+        .subscribe(res => {
+          this.weather = res;
+          this.cd.markForCheck();
+        });
+    }
+  }
+
+  printMe() {
+    console.log('check');
+  }
+}
+```
+
+```typeScript
+
+```
+
+## Lesson 8. BrowserAnimationModule
+
+
+### Lesson 9.01. Animated Collapsable Panel: trigger, style, state e animate
+
+In order to complete the exercises remember to:
+
+    npm install bootstrap
+
+and to configure the angular.json file in order to load the CSS frameworks globally:
+
+```json
+"styles": [
+  "node_modules/bootstrap/dist/css/bootstrap.min.css",
+  "node_modules/font-awesome/css/font-awesome.min.css",
+  "src/styles.css"
+],
+```
+
+```typeScript
+// app.component.ts
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <div class="container mt-3">
+      <app-card title="FIRST">
+        bla bla
+      </app-card>
+
+      <app-card title="SECOND">
+        Un oggetto nella realtà non inizia istantaneamente il suo 
+        movimento e la sua velocità non rimane costante.
+        Quando apriamo il cassetto, prima gli imprimiamo un’accelerazione e poi lo facciamo rallentare. Quando qualcosa cade, 
+        prima accelera verso il basso, poi rimbalza in alto dopo aver colpito il pavimento.
+        Questa pagina ti aiuta ogni volta a scegliere la funzione di 
+        interpolazione desiderata.
+      </app-card>
+    </div>
+  `,
+  styles: []
+})
+export class AppComponent {
+
+}
+```
+
+```typeScript
+// components/card.component.ts
+import {Component, Input} from '@angular/core';
+import {animate, state, style, transition, trigger} from '@angular/animations';
+
+@Component({
+  selector: 'app-card',
+  animations: [
+    trigger('collapsable', [
+      state('opened', style({
+        height: '*'
+      })),
+      state('closed', style({
+        height: 0,
+        padding: 0
+      })),
+      transition('opened <=> closed', [
+        animate('0.7s cubic-bezier(0.77, 0, 0.175, 1)')
+      ])
+    ])
+  ],
+  template: `
+    <div class="card bg-dark text-white mb-1">
+      <div class="card-header" (click)="toggle()">{{title}}</div>
+      <div class="card-body" style="overflow: hidden"
+           [@collapsable]="state">
+        <ng-content></ng-content>
+      </div>
+    </div>
+  `,
+})
+export class CardComponent {
+  @Input() title!: string;
+  state = 'opened';
+
+  toggle() {
+    this.state = this.state === 'opened' ? 'closed' : 'opened';
+    console.log(this.state)
+  }
+}
+```
+
+```typeScript
+// app.module.ts
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+import { AppComponent } from './app.component';
+import { CardComponent } from './components/card.component';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    CardComponent,
+  ],
+  imports: [
+    BrowserModule,
+    BrowserAnimationsModule
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+```
+
+### Lesson 9.02. Animated TabBar: animations e components lifecycle
+
+
+```typeScript
+// app.component.ts
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <div class="container mt-3">
+      <app-animated-button (click)="active = 'one'" [selected]="active === 'one'">ONE</app-animated-button>
+      <app-animated-button (click)="active = 'two'" [selected]="active === 'two'">TWO</app-animated-button>
+      <app-animated-button (click)="active = 'three'" [selected]="active === 'three'">THREE</app-animated-button>
+    </div>
+  `,
+  styles: []
+})
+export class AppComponent {
+  active = 'one';
+}
+
+```
+
+```typeScript
+// components/animated-button.component.ts
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { animate, state, style, transition, trigger } from '@angular/animations';
+
+@Component({
+  selector: 'app-animated-button',
+  animations: [
+    trigger('buttonAnimated', [
+      state('selected', style({
+        borderColor: 'white',
+        backgroundColor: 'orange',
+        transform: 'scale(1.3) rotate(-10deg)'
+      })),
+      state('over', style({
+        transform: 'scale(1.3) rotate(20deg)'
+      })),
+      state('out', style({
+        transform: 'scale(1) rotate(0)'
+      })),
+      transition('out <=> over', [
+        // https://easings.net/
+        animate('0.5s cubic-bezier(0.645, 0.045, 0.355, 1)')  // cubic
+      ]),
+      transition('* <=> selected', [
+        // https://easings.net/
+        animate('0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275)') // back
+      ])
+    ])
+  ],
+  template: `
+    <button
+      class="button"
+      [disabled]="selected"
+      [@buttonAnimated]="state"
+      (mouseover)="state = 'over'"
+      (mouseout)="leaveHandler()"
+    > <ng-content></ng-content> </button>
+  `,
+  styleUrls: ['./animated-button.component.css']
+})
+export class AnimatedButtonComponent implements OnChanges {
+  @Input() selected: boolean = false;  // fix for strict mode
+  state = 'out';
+
+  ngOnChanges(changes: SimpleChanges) {
+    // UPDATE: fix per funzionare nelle ultime versioni di Angular
+    this.state = changes['selected'].currentValue ? 'selected' : 'out';
+  }
+
+  leaveHandler() {
+    // UPDATE: fix per funzionare nelle ultime versioni di Angular
+    // impostiamo lo stato ad 'out' al mouseout solo se l'elemento non è selezionato
+    if (!this.selected) {
+      this.state = 'out'
+    }
+  }
+}
+```
+
+
+### Lesson 9.03. Animated Text: animation events handlers
+
+
+```typeScript
+// app.component.ts
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'app-animated-button-demo',
+  template: `
+    <app-animated-button
+      *ngFor="let section of sections"
+      (click)="active = section" [selected]="section.id === active.id">
+      
+      {{section.label}} 
+      
+    </app-animated-button>
+    
+    <app-animated-text [text]="active.text"></app-animated-text>
+  `,
+})
+export class AnimatedButtonDemo2Component {
+  sections = [
+    { id: 1, label: 'FIRST', text: 'Callbacks can serve as a debugging tool, for example in conjunction with console.warn() to view the application\'s progress in a browser\'s Developer JavaScript Console. The following code snippet creates console log output for our original example, a button with the two states of open and closed.'},
+    { id: 2, label: 'SECOND', text: 'In the previous section, we saw a simple two-state transition. Now we\'ll create an animation with multiple steps run in sequence using keyframes.'},
+    { id: 3, label: 'THIRD', text: 'bla bla 3' },
+  ];
+  active = this.sections[0];
+}
+```
+
+```typeScript
+// components/animated-text.component.ts
+import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
+import {animate, state, style, transition, trigger, AnimationEvent} from '@angular/animations';
+
+@Component({
+  selector: 'app-animated-text',
+  animations: [
+    trigger('animatedText', [
+      state('show', style({
+        opacity: 1,
+        marginTop: 0
+      })),
+      state('hide', style({
+        opacity: 0,
+        marginTop: '50px'
+      })),
+      transition('show <=> hide', [
+        animate('0.7s cubic-bezier(0.645, 0.045, 0.355, 1)')
+      ])
+    ])
+  ],
+  template: `
+    <p [@animatedText]="state" (@animatedText.done)="showNext($event)">
+      {{textToShow}}
+    </p>
+  `,
+  styles: []
+})
+export class AnimatedTextComponent implements OnChanges {
+  @Input() text: string = ''
+  textToShow: string = '';
+
+  state = 'show';
+
+  ngOnChanges(changes: SimpleChanges): void {
+    console.log('changed')
+    if (changes['text'].isFirstChange()) {
+      this.textToShow = changes['text'].currentValue;
+    } else {
+      this.state = 'hide';
+    }
+  }
+
+  showNext(event: AnimationEvent) {
+    console.log(event)
+    if (event.toState === 'hide') {
+      this.state = 'show';
+      this.textToShow = this.text;
+    }
+  }
+
+}
+```
+
+```typeScript
+// components/animated-button.component.ts
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { animate, state, style, transition, trigger } from '@angular/animations';
+
+@Component({
+  selector: 'app-animated-button',
+  animations: [
+    trigger('buttonAnimated', [
+      state('selected', style({
+        borderColor: 'white',
+        backgroundColor: 'orange',
+        transform: 'scale(1.3) rotate(-10deg)'
+      })),
+      state('over', style({
+        transform: 'scale(1.3) rotate(20deg)'
+      })),
+      state('out', style({
+        transform: 'scale(1) rotate(0)'
+      })),
+      transition('out <=> over', [
+        // https://easings.net/
+        animate('0.5s cubic-bezier(0.645, 0.045, 0.355, 1)')  // cubic
+      ]),
+      transition('* <=> selected', [
+        // https://easings.net/
+        animate('0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275)') // back
+      ])
+    ])
+  ],
+  template: `
+    <button
+      class="button"
+      [disabled]="selected"
+      [@buttonAnimated]="state"
+      (mouseover)="state = 'over'"
+      (mouseout)="leaveHandler()"
+    > <ng-content></ng-content> </button>
+  `,
+  styleUrls: ['./animated-button.component.css']
+})
+export class AnimatedButtonComponent implements OnChanges {
+  @Input() selected: boolean = false;  // fix for strict mode
+  state = 'out';
+
+  ngOnChanges(changes: SimpleChanges) {
+    // UPDATE: fix per funzionare nelle ultime versioni di Angular
+    this.state = changes['selected'].currentValue ? 'selected' : 'out';
+  }
+
+  leaveHandler() {
+    // UPDATE: fix per funzionare nelle ultime versioni di Angular
+    // impostiamo lo stato ad 'out' al mouseout solo se l'elemento non è selezionato
+    if (!this.selected) {
+      this.state = 'out'
+    }
+  }
+}
+```
+
+```typeScript
+// app.module.ts
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+import { AppComponent } from './app.component';
+import { CardComponent } from './components/card.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { AnimatedButtonComponent } from './components/animated-button.component';
+import { AnimatedTextComponent } from './components/animated-text.component';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    CardComponent,
+    AnimatedButtonComponent,
+    AnimatedTextComponent,
+  ],
+  imports: [
+    BrowserModule,
+    BrowserAnimationsModule
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+```
+
+## Lesson 10. Multi-view applications con Angular Router
+
+### Lesson 10.01. Angular Router
+
+[Routers Doc](https://angular.io/guide/router)
+
+
+### Lesson 10.02. Angular Router CLI
+
+```typeScript
+// app.component.ts
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: `
+
+    <router-outlet></router-outlet>
+  `
+})
+export class AppComponent {
+
+}
+
+```
+
+```typeScript
+
+    RouterModule.forRoot([
+      { path: 'catalog', component: CatalogComponent},
+      { path: 'contacts', component: ContactsComponent },
+      { path: '**', redirectTo: 'catalog' },
+    ])
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+
+```
+
+
+### Lesson 10.03. Navigation Bar
+
+```typeScript
+// app.component.ts
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <app-navbar></app-navbar>
+    <hr>
+    <router-outlet></router-outlet>
+  `
+})
+export class AppComponent {
+
+}
+```
+
+```typeScript
+// core/navbar/navbar.component.ts
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'app-navbar',
+  template: `
+    <nav class="navbar navbar-expand navbar-dark bg-dark text-white">
+      <a class="navbar-brand">ANGULAR</a>
+      <div class="navbar-collapse collapse">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/catalog" routerLinkActive="active">Catalog</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/contacts" routerLinkActive="active">contact</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  `,
+  styles: []
+})
+export class NavbarComponent implements OnInit {
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+}
+```
+
+```typeScript
+// app.module.ts
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+
+import { AppComponent } from './app.component';
+import { CardComponent } from './shared/card/card.component';
+import { CatalogComponent } from './features/catalog/catalog.component';
+import { ContactsComponent } from './features/contacts/contacts.component';
+import { RouterModule } from '@angular/router';
+import { NavbarComponent } from './core/navbar/navbar.component';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    CardComponent,
+    CatalogComponent,
+    ContactsComponent,
+    NavbarComponent,
+  ],
+  imports: [
+    BrowserModule,
+    RouterModule.forRoot([
+      { path: 'catalog', component: CatalogComponent},
+      { path: 'contacts', component: ContactsComponent },
+      { path: '**', redirectTo: 'catalog' },
+    ])
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+```
+
+### Lesson 10.04. AngularCLI and AppRoutingModule
+
+```json
+ng new my-project --inline-template --inline-style --skip-tests
+
+// Versione abbreviata
+ng new my-project -t -s -S
+
+// Con prefisso custom fb invece di 'app'
+ng new my-project -t -s -S --prefix fb
+```
+
+The parameters used in the CLI, when creating an Angular project, will determine how components will later be created through the use of generators:
+
+    --inline-template: creates components using templates instead of templateUrls
+    --inline-style: uses styles instead of stylesUrls
+    --skip-tests: no test files (.spec) will be generated
+    --prefix xyz: creates components using xyz-component prefix instead of app-component
+
+
+### Lesson 10.05. Parameters e ActivatedRoute
+
+```typeScript
+// features/user-details/user-details.component.ts
+import { Component } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
+
+@Component({
+  selector: 'app-user-details',
+  template: `
+    <div *ngIf="user">
+      <h1>{{user.name}}</h1>
+      <h2>{{user.email}}</h2>
+    </div>
+  `,
+  styles: []
+})
+export class UserDetailsComponent {
+  user: any; // <== ovviamente questo oggetto potrà (e dovrà) essere tipizzato. Crea un type con interface User { ... } )
+
+  constructor(
+    activatedRoute: ActivatedRoute,
+    http: HttpClient
+  ) {
+    const id = +activatedRoute.snapshot.params['id'];
+    http.get(`https://jsonplaceholder.typicode.com/users/${id}`)
+      .subscribe(res => {
+        this.user = res;
+      });
+  }
+}
+```
+
+```typeScript
+// features/users/users.component.ts
+import { Component, OnInit } from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+
+@Component({
+  selector: 'app-users',
+  template: `
+    <li *ngFor="let user of users" [routerLink]="['/users', user.id]">
+      {{user.name}}
+    </li>
+  `,
+  styles: []
+})
+export class UsersComponent {
+  users: any[] = []; // puoi tipizzare questo array con User[] (ma dovrai creare un type User)
+
+  constructor(http: HttpClient) {
+    http.get<any[]>('https://jsonplaceholder.typicode.com/users')
+      .subscribe(res => this.users = res);
+  }
+
+}
+```
+
+```typeScript
+// app.component.ts
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <button routerLink="users">users</button>
+    <hr>
+    <router-outlet></router-outlet>
+  `,
+  styles: []
+})
+export class AppComponent {
+  title = 'angular-course-project';
+}
+```
+
+```typeScript
+// app.module.ts
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+
+import { AppRoutingModule } from './app-routing.module';
+import { AppComponent } from './app.component';
+import {RouterModule} from '@angular/router';
+import { UsersComponent } from './features/users/users.component';
+import { UserDetailsComponent } from './features/user-details/user-details.component';
+import {HttpClientModule} from '@angular/common/http';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    UsersComponent,
+    UserDetailsComponent
+  ],
+  imports: [
+    BrowserModule,
+    HttpClientModule,
+    AppRoutingModule
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+```
+
+```typeScript
+// app-routing.module.ts
+import { NgModule } from '@angular/core';
+import { Routes, RouterModule } from '@angular/router';
+import {UsersComponent} from './features/users/users.component';
+import {UserDetailsComponent} from './features/user-details/user-details.component';
+
+const routes: Routes = [
+  { path: 'users', component: UsersComponent },
+  { path: 'users/:id', component: UserDetailsComponent },
+  { path: '**', redirectTo: 'users'}
+];
+
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule]
+})
+export class AppRoutingModule { }
+```
+
+### Lesson 10.06. ActivatedRoute e Router API
+
+```typeScript
+// features/user-details/user-details.component.ts
+import { Component } from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {ActivatedRoute, Router} from '@angular/router';
+
+@Component({
+  selector: 'app-user-details',
+  template: `
+    <div *ngIf="user">
+      <h1>{{user.name}}</h1>
+      <h2>{{user.email}}</h2>
+    </div>
+    <button (click)="gotoNextUser()">Next</button>
+  `,
+  styles: []
+})
+export class UserDetailsComponent {
+  user: any;  // crea un type User per completare la tipizzazione
+  id: number | null = null
+
+  constructor(
+    activatedRoute: ActivatedRoute,
+    http: HttpClient,
+    private router: Router
+  ) {
+    activatedRoute.params
+      .subscribe(params => {
+        this.id = +params['id'];
+        http.get(`https://jsonplaceholder.typicode.com/users/${this.id}`)
+          .subscribe(res => {
+            this.user = res;
+          });
+      });
+  }
+
+  gotoNextUser() {
+    if (this.id) {
+      const nextId = this.id + 1;
+      this.router.navigateByUrl(`users/${nextId}`);
+    }
+  }
+
+}
+```
+
+### Lesson 10.07. Router's Events & RxJS operators
+
+```typeScript
+// VERSIONE AGGIORNATA PER ANGULAR 11+
+// app.component.ts
+import { Component } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs';
+
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <button routerLink="users">users</button>
+    <hr>
+    <router-outlet></router-outlet>
+  `,
+  styles: []
+})
+export class AppComponent {
+   constructor(router: Router) {
+    router.events
+      .pipe(
+        filter(event => event instanceof NavigationEnd),
+      )
+      .subscribe((event) => {
+        console.log((event as NavigationEnd).url);
+      });
+  }
+}
+```
+
+```typeScript
+// VERSIONE ANGULAR 7/8/9/10
+// app.component.ts
+import { Component } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs/operators';
+// FIX RXJS 7 (Angular 12/13): rinuovere procedente import in favore di questo:
+// import { filter } from 'rxjs';
+
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <button routerLink="users">users</button>
+    <hr>
+    <router-outlet></router-outlet>
+  `,
+  styles: []
+})
+export class AppComponent {
+  constructor( router: Router) {
+    router.events
+      .pipe(
+        filter(event => event instanceof NavigationEnd),
+      )
+      .subscribe((event: NavigationEnd) => {
+        console.log(event.url);
+      });
+  }
+}
+```
+
+## Lesson 11. Server Communication
+
+### Lesson 11.01. mock server: json-server
+
+```typeScript
+npm install json-server --save-dev
+```
+server/db.json:
+
+
+```json
+{
+  "devices": [
+    {
+      "label": "IPhone X",
+      "os": "ios",
+      "price": 1200,
+      "rate": 2,
+      "memory": 6000,
+      "desc": "This device is too expensive!!!!",
+      "id": 1
+    },
+    {
+      "label": "One Plus 5",
+      "os": "android",
+      "price": 390,
+      "rate": 4,
+      "memory": 8000,
+      "desc": "One Plus 5 is a flagship phone...",
+      "id": 2
+    }
+  ],
+  "login": {
+    "token": 123456
+  }
+}
+```
+
+package.json:
+
+
+```json
+"scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "test": "ng test",
+    "lint": "ng lint",
+    "e2e": "ng e2e",
+    "server": "json-server --watch server/db.json"
+  },
+```
+
+### Lesson 11.02. GET: data load from REST API and custom types
+
+
+```typeScript
+// features/catalog/catalog.component.ts
+import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Device } from './model/device';
+
+@Component({
+  selector: 'app-catalog',
+  template: `
+    <li *ngFor="let device of devices">
+      {{device.label}} ({{device.price}})
+    </li>
+  `,
+  styles: []
+})
+export class CatalogComponent implements OnInit {
+  devices: Device[];
+
+  constructor(private http: HttpClient) {}
+
+  ngOnInit() {
+    this.http.get<Device[]>('http://localhost:3000/devices')
+      .subscribe((result: Device[]) => {
+        this.devices = result;
+      });
+  }
+
+}
+```
+
+```typeScript
+// features/catalog/model/device.ts
+export interface Device {
+  label: string;
+  os: string;
+  price: number;
+  rate: number;
+  memory: number;
+  desc: string;
+  id: number;
+}
+```
+
+```typeScript
+
+```
+
+### Lesson 11.03. DELETE: Delete elements and error handling XHR
+
+```typeScript
+// Esempio per Angular 12 e inferiore
+// features/catalog/catalog.component.ts
+import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Device } from './model/device';
+
+@Component({
+  selector: 'app-catalog',
+  template: `
+    
+    <div *ngIf="error" 
+        class="alert alert-danger">
+      error
+      <i class="fa fa-times" (click)="error = null"></i>
+    </div>
+    
+    <li *ngFor="let device of devices">
+      {{device.label}} ({{device.price}})
+      <button (click)="delete(device)">delete</button>
+    </li>
+  `,
+  styles: []
+})
+export class CatalogComponent implements OnInit {
+  devices: Device[];
+  error: any;
+
+  constructor(private http: HttpClient) {}
+
+  ngOnInit() {
+    this.http.get<Device[]>('http://localhost:3000/devices')
+      .subscribe((result: Device[]) => {
+        this.devices = result;
+      });
+  }
+
+  delete(device: Device) {
+    this.http.delete(`http://localhost:3000/devices/${device.id}`)
+      .subscribe(
+        () => {
+          const index = this.devices.findIndex(d => d.id === device.id);
+          this.devices.splice(index, 1);
+        },
+        err => this.error = err
+      );
+
+
+  }
+
+}
+```
+
+```typeScript
+// model/device.ts
+export interface Device {
+  label: string;
+  os: string;
+  price: number;
+  rate: number;
+  memory: number;
+  desc: string;
+  id: number;
+}
+```
+
+```typeScript
+// Esempio per Angular 13+
+// features/catalog/catalog.component.ts
+// Esempio per Angular 13+
+// features/catalog/catalog.component.ts
+import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Device } from './model/device';
+
+@Component({
+  selector: 'app-root',
+  template: `
+
+    <div *ngIf="error"
+         class="alert alert-danger">
+      error
+      <i class="fa fa-times" (click)="error = false"></i>
+    </div>
+
+    <li *ngFor="let device of devices">
+      {{device.label}} ({{device.price}})
+      <button (click)="delete(device)">delete</button>
+    </li>
+  `,
+  styles: []
+})
+export class CatalogComponent implements OnInit {
+  devices: Device[] = [];
+  error: boolean = false;
+
+  constructor(private http: HttpClient) {}
+
+  ngOnInit() {
+    this.http.get<Device[]>('http://localhost:3000/devices')
+      .subscribe((result: Device[]) => {
+        this.devices = result;
+      });
+  }
+
+  delete(device: Device) {
+    this.http.delete(`http://localhost:3000/devices/${device.id}`)
+      .subscribe({
+        next: () => {
+          const index = this.devices.findIndex(d => d.id === device.id);
+          this.devices.splice(index, 1);
+        },
+        error: () => {
+          this.error = true;
+        }
+      });
+
+  }
+
+}
+```
+
+### Lesson 11.04. Dynamic styles and best look & feel
+
+```typeScript
+// Angular 9 e inferiore (versione originale)
+// features/catalog/catalog.component.ts
+import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Device } from './model/device';
+import { NgForm } from '@angular/forms';
+
+const URL = 'http://localhost:3000';
+
+@Component({
+  selector: 'app-catalog',
+  template: `
+    <div *ngIf="error" 
+        class="alert alert-danger">
+      error
+      <i class="fa fa-times" (click)="error = null"></i>
+    </div>
+
+    <li class="list-group-item" *ngFor="let device of devices">
+      <i 
+        class="fa" 
+        [ngClass]="{
+          'fa-android': device.os === 'android',
+          'fa-apple': device.os === 'ios'
+        }"
+        [style.color]="device.os === 'android' ? 'green' : 'grey'"
+      ></i>
+      {{device.label}}
+      <span *ngIf="device.memory">({{device.memory / 1000}}Gb)</span>
+      
+      <div class="pull-right">
+        <span
+          *ngIf="device.price"  
+          [style.color]="device.price > 500 ? 'red' : null">
+          € {{device.price}}
+        </span>
+        <i 
+          class="fa fa-trash" 
+          (click)="delete(device)"
+        ></i>
+      </div>
+    </li>
+  `,
+  styles: []
+})
+export class CatalogComponent implements OnInit {
+  devices: Device[];
+  error: any;
+
+
+  constructor(private http: HttpClient) {}
+
+  ngOnInit() {
+    this.http.get<Device[]>(`${URL}/devices`)
+      .subscribe((result: Device[]) => {
+        this.devices = result;
+      });
+  }
+
+  delete(device: Device) {
+    this.http.delete(`${URL}/devices/${device.id}`)
+      .subscribe(
+        () => {
+          const index = this.devices.findIndex(d => d.id === device.id);
+          this.devices.splice(index, 1);
+        },
+        err => this.error = err
+      );
+  }
+
+
+}
+```
+
+```typeScript
+// Angular 13+
+// features/catalog/catalog.component.ts
+import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Device } from './model/device';
+
+const URL = 'http://localhost:3000';
+
+@Component({
+  selector: 'app-catalog',
+  template: `
+    <div *ngIf="error" class="alert alert-danger">
+      error
+      <i class="fa fa-times" (click)="error = false"></i>
+    </div>
+
+    <ul class="list-group">
+      <li class="list-group-item" *ngFor="let device of devices">
+        <i
+          class="fa"
+          [ngClass]="{
+            'fa-android': device.os === 'android',
+            'fa-apple': device.os === 'ios'
+          }"
+          [style.color]="device.os === 'android' ? 'green' : 'grey'"
+        ></i>
+        {{device.label}}
+        <span *ngIf="device.memory">({{device.memory / 1000}}Gb)</span>
+  
+        <div class="pull-right">
+          <span
+            *ngIf="device.price"
+            [style.color]="device.price > 500 ? 'red' : null">
+            € {{device.price}}
+          </span>
+          <i
+            class="fa fa-trash"
+            (click)="delete(device)"
+          ></i>
+        </div>
+      </li>
+    </ul>
+  `,
+  styles: []
+})
+export class CatalogComponent implements OnInit {
+  devices: Device[] = []
+  error: boolean = false;
+
+
+  constructor(private http: HttpClient) {}
+
+  ngOnInit() {
+    this.http.get<Device[]>(`${URL}/devices`)
+      .subscribe((result: Device[]) => {
+        this.devices = result;
+      });
+  }
+
+  delete(device: Device) {
+    this.http.delete(`${URL}/devices/${device.id}`)
+      .subscribe({
+        next: () => {
+          const index = this.devices.findIndex(d => d.id === device.id);
+          this.devices.splice(index, 1);
+        },
+        error: () => this.error = true
+      })
+  }
+
+
+}
+```
+
+### Lesson 11.05. POST: Add elements and form validation
+
+
+```typeScript
+// VERSIONE ORIGINAL DEL VIDEO
+// features/catalog/catalog.component.ts
+import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Device } from './model/device';
+import { NgForm } from '@angular/forms';
+
+const URL = 'http://localhost:3000';
+
+@Component({
+  selector: 'app-catalog',
+  template: `
+    <div *ngIf="error" 
+        class="alert alert-danger">
+      error
+      <i class="fa fa-times" (click)="error = null"></i>
+    </div>
+    
+    <form #f="ngForm" (submit)="add(f)">
+      <input
+          [ngModel]
+          name="label"
+          type="text" 
+          placeholder="device model"
+      >
+      <button type="submit">ADD</button>
+    </form>
+    
+    <li class="list-group-item" *ngFor="let device of devices">
+      <i 
+        class="fa" 
+        [ngClass]="{
+          'fa-android': device.os === 'android',
+          'fa-apple': device.os === 'ios'
+        }"
+        [style.color]="device.os === 'android' ? 'green' : 'grey'"
+      ></i>
+      {{device.label}}
+      <span *ngIf="device.memory">({{device.memory / 1000}}Gb)</span>
+      
+      <div class="pull-right">
+        <span
+          *ngIf="device.price"  
+          [style.color]="device.price > 500 ? 'red' : null">
+          € {{device.price}}
+        </span>
+        <i 
+          class="fa fa-trash" 
+          (click)="delete(device)"
+        ></i>
+      </div>
+    </li>
+  `,
+  styles: []
+})
+export class CatalogComponent implements OnInit {
+  devices: Device[];
+  error: any;
+
+
+  constructor(private http: HttpClient) {}
+
+  ngOnInit() {
+    this.http.get<Device[]>(`${URL}/devices`)
+      .subscribe((result: Device[]) => {
+        this.devices = result;
+      });
+  }
+  
+  // NOTA: in RxJS la seconda callback è stata deprecata
+  // Vedi soluzione AGGIORNATA
+  delete(device: Device) {
+    this.http.delete(`${URL}/devices/${device.id}`)
+      .subscribe(
+        () => {
+          const index = this.devices.findIndex(d => d.id === device.id);
+          this.devices.splice(index, 1);
+        },
+        err => this.error = err
+      );
+  }
+
+  add(form: NgForm) {
+    this.http.post<Device>(`${URL}/devices`, form.value)
+      .subscribe((result: Device) => {
+        this.devices.push(result);
+      });
+  }
+
+}
+```
+
+```typeScript
+// VERSIONE AGGIORNATA ANGULAR 13 / RXJS 7.5
+// features/catalog/catalog.component.ts
+import { Component, OnInit } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { NgForm } from '@angular/forms';
+import { Device } from './model/device';
+import { catchError, of } from 'rxjs';
+
+const URL = 'http://localhost:3000';
+
+@Component({
+  selector: 'app-catalog',
+  template: `
+    <div *ngIf="error"
+         class="alert alert-danger">
+      error
+      <i class="fa fa-times" (click)="error = null"></i>
+    </div>
+
+    <form #f="ngForm" (submit)="add(f)">
+      <input
+        [ngModel]
+        name="label"
+        type="text"
+        placeholder="device model"
+      >
+      <button type="submit">ADD</button>
+    </form>
+
+    <li class="list-group-item" *ngFor="let device of devices">
+      <i
+        class="fa"
+        [ngClass]="{
+          'fa-android': device.os === 'android',
+          'fa-apple': device.os === 'ios'
+        }"
+        [style.color]="device.os === 'android' ? 'green' : 'grey'"
+      ></i>
+      {{device.label}}
+      <span *ngIf="device.memory">({{device.memory / 1000}}Gb)</span>
+
+      <div class="pull-right">
+        <span
+          *ngIf="device.price"
+          [style.color]="device.price > 500 ? 'red' : null">
+          € {{device.price}}
+        </span>
+        <i
+          class="fa fa-trash"
+          (click)="delete(device)"
+        ></i>
+      </div>
+    </li>
+  `,
+  styles: []
+})
+export class CatalogComponent implements OnInit {
+  devices: Device[] = [];
+  error: HttpErrorResponse | null = null;
+
+
+  constructor(private http: HttpClient) {}
+
+  ngOnInit() {
+    this.http.get<Device[]>(`${URL}/devices`)
+      .pipe(
+        catchError((err) => of(err))
+      )
+      .subscribe((result: Device[] | HttpErrorResponse) => {
+        if (result instanceof HttpErrorResponse) {
+          this.error = result;
+        } else {
+          this.devices = result;
+        }
+      });
+  }
+
+  // NOTA: in RxJS la seconda callback è stata deprecata
+  // Di seguito usiamo l'operatore catchError
+  delete(device: Device) {
+    this.error = null;
+    this.http.delete(`${URL}/devices/${device.id}`)
+      .pipe(
+        catchError((err) => of(err))
+      )
+      .subscribe((result: HttpErrorResponse | undefined) => {
+        if (result instanceof HttpErrorResponse) {
+          this.error = result;
+        } else {
+          const index = this.devices.findIndex(d => d.id === device.id);
+          this.devices.splice(index, 1);
+        }
+      });
+  }
+
+  add(form: NgForm) {
+    this.error = null;
+    this.http.post<Device>(`${URL}/devices`, form.value)
+      .pipe(
+        catchError((err) => of(err))
+      )
+      .subscribe((result: HttpErrorResponse | Device) => {
+        if (result instanceof HttpErrorResponse) {
+          this.error = result;
+        } else {
+          this.devices.push(result);
+        }
+      });
+  }
+
+}
+```
+
+### Lesson 11.06. PUT e PATCH: edit and update element
+
+```typeScript
+// Angular 9 (versione originale)
+// features/catalog/catalog.component.ts
+import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Device } from './model/device';
+import { NgForm } from '@angular/forms';
+
+const URL = 'http://localhost:3000';
+
+@Component({
+  selector: 'app-catalog',
+  template: `
+    <div *ngIf="error" 
+        class="alert alert-danger">
+      error
+      <i class="fa fa-times" (click)="error = null"></i>
+    </div>
+    
+    <form #f="ngForm" (submit)="save(f)">
+      <input
+          [ngModel]="active?.label"
+          name="label"
+          type="text" 
+          placeholder="device model"
+      >
+      <button type="submit">
+        {{active ? 'EDIT' : 'ADD'}}
+      </button>
+      
+      <button 
+          type="button" 
+          (click)="reset(f)">RESET</button>
+    </form>
+    
+    <li class="list-group-item"
+        [ngClass]="{ 'active': device.id === active?.id}"
+        *ngFor="let device of devices"
+        (click)="setActive(device)"
+    >
+      <i 
+        class="fa" 
+        [ngClass]="{
+          'fa-android': device.os === 'android',
+          'fa-apple': device.os === 'ios'
+        }"
+        [style.color]="device.os === 'android' ? 'green' : 'grey'"
+      ></i>
+      {{device.label}}
+      <span *ngIf="device.memory">({{device.memory / 1000}}Gb)</span>
+      
+      <div class="pull-right">
+        <span
+          *ngIf="device.price"  
+          [style.color]="device.price > 500 ? 'red' : null">
+          € {{device.price}}
+        </span>
+        <i 
+          class="fa fa-trash" 
+          (click)="delete(device, $event)"
+        ></i>
+      </div>
+    </li>
+  `,
+  styles: []
+})
+export class CatalogComponent implements OnInit {
+  devices: Device[];
+  active: Device;
+  error: any;
+
+
+  constructor(private http: HttpClient) {}
+
+  ngOnInit() {
+    this.http.get<Device[]>(`${URL}/devices`)
+      .subscribe((result: Device[]) => {
+        this.devices = result;
+      });
+  }
+
+  delete(device: Device, event: MouseEvent) {
+    event.stopPropagation();
+
+    this.http.delete(`${URL}/devices/${device.id}`)
+      .subscribe(
+        () => {
+          const index = this.devices.findIndex(d => d.id === device.id);
+          this.devices.splice(index, 1);
+        },
+        err => this.error = err
+      );
+  }
+
+  save(form: NgForm) {
+    if (this.active) {
+      this.edit(form);
+    } else {
+      this.add(form);
+    }
+  }
+
+  add(form: NgForm) {
+    this.http.post<Device>(`${URL}/devices`, form.value)
+      .subscribe((result: Device) => {
+        this.devices.push(result);
+      });
+  }
+
+  edit(form: NgForm) {
+    this.http.patch<Device>(`${URL}/devices/${this.active.id}`, form.value)
+      .subscribe(res => {
+        const index = this.devices.findIndex(d => d.id === this.active.id)
+        this.devices[index] = res;
+      });
+  }
+
+  setActive(device: Device) {
+    this.active = device;
+  }
+
+  reset(form: NgForm) {
+    this.active = null;
+    form.reset();
+  }
+}
+```
+
+```typeScript
+// Versione 14+
+// features/catalog/catalog.component.ts
+import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Device } from './model/device';
+import { NgForm } from '@angular/forms';
+
+const URL = 'http://localhost:3000';
+
+@Component({
+  selector: 'app-catalog',
+  template: `
+    <div *ngIf="error" class="alert alert-danger">
+      error
+      <i class="fa fa-times" (click)="error = false"></i>
+    </div>
+
+    <form #f="ngForm" (submit)="save(f)">
+      <input
+        [ngModel]="active?.label"
+        name="label"
+        type="text"
+        placeholder="device model"
+      >
+      <button type="submit">
+        {{active ? 'EDIT' : 'ADD'}}
+      </button>
+
+      <button
+        type="button"
+        (click)="reset(f)">RESET</button>
+    </form>
+
+    <li class="list-group-item"
+        [ngClass]="{ 'active': device.id === active?.id}"
+        *ngFor="let device of devices"
+        (click)="setActive(device)"
+    >
+      <i
+        class="fa"
+        [ngClass]="{
+          'fa-android': device.os === 'android',
+          'fa-apple': device.os === 'ios'
+        }"
+        [style.color]="device.os === 'android' ? 'green' : 'grey'"
+      ></i>
+      {{device.label}}
+      <span *ngIf="device.memory">({{device.memory / 1000}}Gb)</span>
+
+      <div class="pull-right">
+        <span
+          *ngIf="device.price"
+          [style.color]="device.price > 500 ? 'red' : null">
+          € {{device.price}}
+        </span>
+        <i
+          class="fa fa-trash"
+          (click)="delete(device, $event)"
+        ></i>
+      </div>
+    </li>
+  `,
+  styles: []
+})
+export class CatalogComponent implements OnInit {
+  devices: Device[] = [];
+  active: Device | null = null;
+  error: boolean = false;
+
+
+  constructor(private http: HttpClient) {}
+
+  ngOnInit() {
+    this.http.get<Device[]>(`${URL}/devices`)
+      .subscribe((result: Device[]) => {
+        this.devices = result;
+      });
+  }
+
+  delete(device: Device, event: MouseEvent) {
+    event.stopPropagation();
+
+    this.http.delete(`${URL}/devices/${device.id}`)
+      .subscribe({
+        next: () => {
+          const index = this.devices.findIndex(d => d.id === device.id);
+          this.devices.splice(index, 1);
+        },
+        error: () => this.error = true
+      })
+  }
+
+  save(form: NgForm) {
+    if (this.active) {
+      this.edit(form);
+    } else {
+      this.add(form);
+    }
+  }
+
+  add(form: NgForm) {
+    this.http.post<Device>(`${URL}/devices`, form.value)
+      .subscribe((result: Device) => {
+        this.devices.push(result);
+      });
+  }
+
+  edit(form: NgForm) {
+    this.http.patch<Device>(`${URL}/devices/${this.active?.id}`, form.value)
+      .subscribe(res => {
+        const index = this.devices.findIndex(d => d.id === this.active?.id)
+        this.devices[index] = res;
+      });
+  }
+
+  setActive(device: Device) {
+    this.active = device;
+  }
+
+  reset(form: NgForm) {
+    this.active = null;
+    form.reset();
+  }
+}
+```
+
+
+
