@@ -1589,6 +1589,19 @@ interface User {
 
 ### Lesson 7.01. Hello Components
 
+@Component is a Decorator 
+- selector name is in kebab-case, so must use "-"
+- always use the same prefix for your components, for example "app-" or "kt-"
+
+
+templateUrl vs template: `
+    <app-hello></app-hello>
+    <app-hello></app-hello>
+    <app-hello></app-hello>
+  `
+- can use external file or inline template
+- ` backtick for multiline string
+
 
 ```typeScript
 // app.component.ts
@@ -1684,6 +1697,10 @@ export class HelloComponent {
 ```
 
 ### Lesson 7.03. Content Projection
+
+Angular CLI: 
+  
+    ng g c shared/card --flat
 
 ```typeScript
 // app.component.ts
