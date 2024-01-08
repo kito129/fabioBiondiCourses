@@ -7,23 +7,7 @@
 [Video course by Fabio Biondi](https://www.fabiobiondi.dev/video-courses/angular-fundamentals)
 - bought on 10/16/2023
 - start on 10/17/2023
-- start on 
 
-
-# To-Do List
-
-- [x] Planning
-- [x] day1
-- [x] day2
-- [x] day3
-- [ ] day4
-- [ ] day5
-- [ ] day6
-- [ ] day7
-- [ ] day8
-- [ ] day9
-- [ ] day10
-- [ ] recapDay
 
 
 # Angular Fundamentals
